@@ -14,7 +14,12 @@ class WebFactionAPI:
     def connect(self, machine_name=""):
         if not self.session_id:
             logger.debug("Connecting to API server")
-            username, password = os.environ['WEBFACTION_USER'], os.environ['WEBFACTION_PASS']
+            try:
+                username, password = os.environ['WEBFACTION_USER'], os.environ['WEBFACTION_PASS']
+            except KeyError:
+                logger.error("Please set the webfaction username and password to connect")
+                logger.error("They can be set WEBFACTION_USER and WEBFACTION_PASS variables")
+                exit(1)
             api_version = 2
             self.session_id, self.account = self.server.login(username, password, machine_name,
                                                               api_version)

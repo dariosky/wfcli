@@ -1,7 +1,8 @@
-#!/usr/bin/env python
 # coding=utf-8
+
 import argparse
 import logging
+import os
 import sys
 
 from wfcli.tossl import WebfactionWebsiteToSsl
@@ -24,13 +25,25 @@ def get_cli_parser():
     parser.add_argument('--redis-password')
     parser.add_argument('--app-name')
     parser.add_argument('--webfaction-host')
+    parser.add_argument('--webfaction-user')
+    parser.add_argument('--webfaction-password')
     return parser
 
 
-if __name__ == '__main__':
-    # example './wfcli.py install redis --app-name tambeta'
+def main(args=None):
+    """The main routine."""
+    # example './cli.py install redis --app-name tambeta'
     parser = get_cli_parser()
-    args = parser.parse_args()
+    if args is None:
+        args = sys.argv[1:]
+    args = parser.parse_args(args)
+
+    # set the credential in the environment
+    if args.webfaction_user:
+        os.environ['WEBFACTION_USER'] = args.webfaction_user
+    if args.webfaction_password:
+        os.environ['WEBFACTION_PASS'] = args.webfaction_password
+
     if args.action == "install":
         if args.name == 'redis':
             if not args.app_name:
@@ -44,3 +57,7 @@ if __name__ == '__main__':
             webfaction_host=args.webfaction_host,
         )
         w.secure(domain=args.name)
+
+
+if __name__ == "__main__":
+    main()

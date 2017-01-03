@@ -35,4 +35,5 @@ setup(
 
     keywords='deployment webfaction cli letsencrypt certificate',
     install_requires=['fabric3'],
+    console_scripts=['wfcli = wfcli.__main__:main'],
 )
