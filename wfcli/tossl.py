@@ -10,7 +10,7 @@ from fabric.context_managers import hide
 from fabric.contrib.files import exists, is_link
 from fabric.operations import run
 
-from wfapi import WebFactionAPI
+from wfcli.wfapi import WebFactionAPI
 
 logger = logging.getLogger('wfcli.redirect_to_secure')
 

@@ -4,7 +4,7 @@ import argparse
 import logging
 import sys
 
-from tossl import WebfactionWebsiteToSsl
+from wfcli.tossl import WebfactionWebsiteToSsl
 
 logger = logging.getLogger('wfcli')
 

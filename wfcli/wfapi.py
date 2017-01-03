@@ -1,7 +1,6 @@
+import logging
 import os
 import xmlrpc.client
-
-import logging
 
 logger = logging.getLogger('webfaction.api')
 
