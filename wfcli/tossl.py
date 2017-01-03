@@ -31,7 +31,11 @@ class WebfactionWebsiteToSsl:
         """)
 
         if webfaction_host is None:
-            raise RuntimeError("Please provide the Webfaction host, we will connect via SSH")
+            webfaction_host = os.environ.get('WEBFACTION_HOST')
+        if webfaction_host is None:
+            raise RuntimeError(
+                "Provide the Webfaction host or set the WEBFACTION_HOST var,"
+                " we will connect via SSH")
         self.webfaction_host = webfaction_host
 
         self.domain = None
@@ -72,8 +76,8 @@ class WebfactionWebsiteToSsl:
         for website in self.websites:
             for subdomain in website['subdomains']:
                 if (
-                            subdomain == self.domain or
-                        (self.include_subdomains and subdomain.endswith(dotted_domain))
+                                subdomain == self.domain or
+                            (self.include_subdomains and subdomain.endswith(dotted_domain))
                 ):
                     results.add(subdomain)
 

@@ -6,22 +6,37 @@ logger = logging.getLogger('webfaction.api')
 
 
 class WebFactionAPI:
-    def __init__(self):
+    def __init__(self,
+                 machine_name=None,  # not required if you have only one machine
+                 username=None, password=None,
+                 ):
         super().__init__()
+
+        if username is None:
+            username = os.environ.get("WEBFACTION_USER")
+        if password is None:
+            password = os.environ.get("WEBFACTION_PASS")
+        if machine_name is None:
+            # for the API, when we have more machines, we have to select the machine name
+            machine_name = os.environ.get("WEBFACTION_MACHINE_NAME", "")  # empty string as default
+
+        if not username or not password:
+            logger.error("Please set the webfaction username and password to connect")
+            logger.error("They can be set WEBFACTION_USER and WEBFACTION_PASS variables")
+            exit(1)
+
+        self.username = username
+        self.password = password
+        self.machine_name = machine_name
         self.server = xmlrpc.client.ServerProxy('https://api.webfaction.com/')
         self.session_id = self.account = None
 
-    def connect(self, machine_name=""):
+    def connect(self):
         if not self.session_id:
             logger.debug("Connecting to API server")
-            try:
-                username, password = os.environ['WEBFACTION_USER'], os.environ['WEBFACTION_PASS']
-            except KeyError:
-                logger.error("Please set the webfaction username and password to connect")
-                logger.error("They can be set WEBFACTION_USER and WEBFACTION_PASS variables")
-                exit(1)
             api_version = 2
-            self.session_id, self.account = self.server.login(username, password, machine_name,
+            self.session_id, self.account = self.server.login(self.username, self.password,
+                                                              self.machine_name,
                                                               api_version)
 
     def list_apps(self):

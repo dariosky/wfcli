@@ -26,7 +26,7 @@ def get_cli_parser():
     parser.add_argument('--app-name')
     parser.add_argument('--webfaction-host')
     parser.add_argument('--webfaction-user')
-    parser.add_argument('--webfaction-password')
+    parser.add_argument('--webfaction-pass')
     return parser
 
 
@@ -41,8 +41,10 @@ def main(args=None):
     # set the credential in the environment
     if args.webfaction_user:
         os.environ['WEBFACTION_USER'] = args.webfaction_user
-    if args.webfaction_password:
-        os.environ['WEBFACTION_PASS'] = args.webfaction_password
+    if args.webfaction_pass:
+        os.environ['WEBFACTION_PASS'] = args.webfaction_pass
+    if args.webfaction_host:
+        os.environ['WEBFACTION_HOST'] = args.webfaction_host
 
     if args.action == "install":
         if args.name == 'redis':
@@ -53,9 +55,7 @@ def main(args=None):
             print("Unknown install %s" % args.name)
     elif args.action == "secure":
         print("Converting websites in the domain %s to HTTPS" % args.name)
-        w = WebfactionWebsiteToSsl(
-            webfaction_host=args.webfaction_host,
-        )
+        w = WebfactionWebsiteToSsl()
         w.secure(domain=args.name)
 
 

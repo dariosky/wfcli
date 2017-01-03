@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='wfcli',
-    version='0.1',
+    version='0.2',
     packages=['wfcli'],
     url='https://github.com/dariosky/wfcli',
     license='MIT',
