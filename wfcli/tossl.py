@@ -378,15 +378,7 @@ class WebfactionWebsiteToSsl:
             #     logger.warning("Redirection cancelled")
             #     return
 
-            # for some unkwnon reason Webfaction gives errors updating the website just adding
-            # the redirect all leaving the VERIFY_ONE
-
-            # clearing the list of apps (this is bad)
-            # FIXME: This cleaning of apps is bad, I opened a ticket with Webfaction
-            website['website_apps'] = []
-            self.api.update_website(website)
-
-            # updating the apps with the new one, for real
+            # updating the apps with the new one
             website['website_apps'] = apps
             self.api.update_website(website)
 
