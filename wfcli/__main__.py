@@ -11,7 +11,7 @@ logger = logging.getLogger('wfcli')
 
 
 def get_cli_parser():
-    VERSION = '0.1a'
+    VERSION = '0.4'
     parser = argparse.ArgumentParser(
         "Webfaction Command Line Interface",
         description="A CLI wrapper to Webfaction APIs"
@@ -19,14 +19,25 @@ def get_cli_parser():
 
     parser.add_argument("-v", "--version", action="version", version=VERSION)
     parser.add_argument('action', choices=[
-        'install', 'secure'
-    ])
-    parser.add_argument('name')
+        # 'install', # install redis on the server
+        'secure',
+        'renew',
+    ],
+                        help="secure: convert an http domain and all subdomain to https\n"
+                             "renew: renew the https certificates",
+                        )
+    parser.add_argument('name',
+                        nargs="?")
     parser.add_argument('--redis-password')
     parser.add_argument('--app-name')
     parser.add_argument('--webfaction-host')
     parser.add_argument('--webfaction-user')
     parser.add_argument('--webfaction-pass')
+    # parser.add_argument('--force',
+    #                     help="Force the renewal of certificate even if it's still valid",
+    #                     default=False,
+    #                     action="store_true",
+    #                     )
     return parser
 
 
@@ -57,7 +68,18 @@ def main(args=None):
         print("Converting websites in the domain %s to HTTPS" % args.name)
         w = WebfactionWebsiteToSsl()
         w.secure(domain=args.name)
+    elif args.action == "renew":
+        domain = args.name
+        if not domain:
+            print("Renew certificates for all the domains")
+        else:
+            print("Renew certificates for %s" % domain)
+        w = WebfactionWebsiteToSsl()
+        w.sync_certificates(subdomains=args.name)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
+    logging.getLogger('paramiko').setLevel(logging.WARNING)
+
     main()
