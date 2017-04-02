@@ -65,7 +65,7 @@ def main(args=None):
         else:
             print("Unknown install %s" % args.name)
     elif args.action == "secure":
-        print("Converting websites in the domain %s to HTTPS" % args.name)
+        print("Converting websites in the domain %s to HTTPS" % (args.name or '*'))
         w = WebfactionWebsiteToSsl()
         w.secure(domain=args.name)
     elif args.action == "renew":

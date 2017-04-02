@@ -126,14 +126,19 @@ class WebfactionWebsiteToSsl:
             self.is_website_affected,
             self._websites
         ))
+
+        logger.info(
+            "Webfaction - http 2 https - %s" % (self.domain or "All the available domains")
+        )
+
         logger.info(
             "Websites affected: %s" % ", ".join([website['name'] for website in self.websites]))
-
-        logger.info("Webfaction - http 2 https - %s" % self.domain)
-
+        
         # we will create a certificate for a bunch of subdomains
         subdomains = self.get_affected_domains()
-        logger.info("Domains affected: %s" % subdomains)
+        logger.info(
+            "Domains affected: %s" % (subdomains if len(subdomains) < 2 else len(subdomains))
+        )
         if not self.websites:
             logger.info("No websites with the choosen domain")
             return
@@ -149,13 +154,14 @@ class WebfactionWebsiteToSsl:
             self.create_acme_certificates(subdomains)  # we create the acme certificates
         self.sync_certificates(subdomains)  # we sync all the certificates
 
-        main_domain = subdomains[0]
-        certificate = self._certificates[self.slugify(main_domain)]
-
         for website in self.websites:
             if website['https'] is True:
                 continue
             secured_website = self.website_exists_as_secure(website)
+
+            main_domain = self.get_main_domain(website)
+            certificate = self._certificates[self.slugify(main_domain)]
+
             if not secured_website:
                 self.clone_website_as_secure(website, certificate)
             else:
@@ -267,7 +273,7 @@ class WebfactionWebsiteToSsl:
         with fab_settings(warn_only=True):
             # let's issue the certificates with acme
 
-            attempt = 0  # Retry, if the verification app has just been added, it make take sometime
+            attempt = 0  # Retry, if the verification app has just been added, it may take some time
             MAX_ATTEMPTS = 10
             while attempt < MAX_ATTEMPTS:
                 result = run(" ".join(issue_command), quiet=True)
@@ -381,6 +387,26 @@ class WebfactionWebsiteToSsl:
             # updating the apps with the new one
             website['website_apps'] = apps
             self.api.update_website(website)
+
+    def get_main_domain(self, website):
+        """ Given a list of subdomains, return the main domain of them
+            If the subdomain are across multiple domain, then we cannot have a single website
+            it should be splitted
+        """
+        subdomains = website['subdomains']
+        main_domains = set()
+        for sub in subdomains:
+            for d in self._domains:
+                if sub == d or sub.endswith("." + d):
+                    main_domains.add(d)
+        if len(main_domains) > 1:
+            logger.error(
+                "The secure site %s cover multiple domains, it should be splitted" % website['name']
+            )
+            exit(1)
+        elif not main_domains:
+            logger.error("We cannot find the main domain for %s" % website['name'])
+        return list(main_domains)[0]
 
 
 if __name__ == '__main__':
