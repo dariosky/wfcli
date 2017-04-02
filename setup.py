@@ -1,8 +1,8 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='wfcli',
-    version='0.4.2',
+    version='0.4.3',
     packages=['wfcli'],
     url='https://github.com/dariosky/wfcli',
     license='MIT',
@@ -35,5 +35,7 @@ setup(
 
     keywords='deployment webfaction cli letsencrypt certificate',
     install_requires=['fabric3'],
-    console_scripts=['wfcli = wfcli.__main__:main'],
+    entry_points={
+        'console_scripts': ['wfcli = wfcli.__main__:main'],
+    }
 )
