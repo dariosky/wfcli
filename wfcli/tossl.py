@@ -60,6 +60,8 @@ class WebfactionWebsiteToSsl:
 
     def is_website_affected(self, website):
         """ Tell if the website is affected by the domain change """
+        if self.domain is None:
+            return True
         if not self.include_subdomains:
             return self.domain in website['subdomains']
         else:
@@ -72,13 +74,11 @@ class WebfactionWebsiteToSsl:
     def get_affected_domains(self):
         """ Return a list of all affected domain and subdomains """
         results = set()
-        dotted_domain = "." + self.domain
+        dotted_domain = ("." + self.domain) if self.domain else None
         for website in self.websites:
             for subdomain in website['subdomains']:
-                if (
-                                subdomain == self.domain or
-                            (self.include_subdomains and subdomain.endswith(dotted_domain))
-                ):
+                if self.domain is None or subdomain == self.domain or \
+                        (self.include_subdomains and subdomain.endswith(dotted_domain)):
                     results.add(subdomain)
 
         # sort them by lenght so the shortest domain is the first

@@ -60,7 +60,7 @@ class WebFactionAPI:
 
         domain = self.server.create_domain(self.session_id,
                                            domain,
-                                           *subdomains,
+                                           *subdomains
                                            )
         return domain
 
@@ -129,7 +129,7 @@ class WebFactionAPI:
             website['https'],
             website['subdomains'],
             website['certificate'],
-            *website['website_apps'],
+            *website['website_apps']
         )
         return website
 
