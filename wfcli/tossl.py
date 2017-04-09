@@ -23,6 +23,7 @@ class WebfactionWebsiteToSsl:
 
     def __init__(self,
                  webfaction_host=None,
+                 force=False,
                  ):
         self.REDIRECT_TEMPLATE = dedent("""
             RewriteEngine On
@@ -42,6 +43,7 @@ class WebfactionWebsiteToSsl:
         self.include_subdomains = False
         self.websites = []
         self.redirect_app_exists = None  # we remember if the redirect_app is ok
+        self.force = force
 
         # getting all the infos from Webfaction API
         self.api = api = WebFactionAPI()
@@ -118,7 +120,7 @@ class WebfactionWebsiteToSsl:
 
     def secure(self,
                domain,
-               include_subdomains=True
+               include_subdomains=True,
                ):
         self.domain = domain
         self.include_subdomains = include_subdomains
@@ -132,22 +134,32 @@ class WebfactionWebsiteToSsl:
         )
 
         logger.info(
-            "Websites affected: %s" % ", ".join([website['name'] for website in self.websites]))
-        
+            "Websites affected ({num}): {websites}".format(
+                num=len(self.websites),
+                websites=", ".join([website['name'] for website in self.websites])
+            )
+        )
+
         # we will create a certificate for a bunch of subdomains
         subdomains = self.get_affected_domains()
         logger.info(
-            "Domains affected: %s" % (subdomains if len(subdomains) < 2 else len(subdomains))
+            "Domains affected {num}: {domains}".format(
+                num=len(subdomains),
+                domains=subdomains
+            )
         )
         if not self.websites:
             logger.info("No websites with the choosen domain")
             return
 
         # let's check what are the subdomains still unsecured
-        insecured = []
-        for subdomain in subdomains:
-            if not self.domain_exists_as_secured(subdomain):
-                insecured.append(subdomain)
+        if self.force:
+            insecured = subdomains
+        else:
+            insecured = []
+            for subdomain in subdomains:
+                if not self.domain_exists_as_secured(subdomain):
+                    insecured.append(subdomain)
 
         if insecured:
             logger.info("To be secured: %s" % insecured)
@@ -276,6 +288,7 @@ class WebfactionWebsiteToSsl:
             attempt = 0  # Retry, if the verification app has just been added, it may take some time
             MAX_ATTEMPTS = 10
             while attempt < MAX_ATTEMPTS:
+                logger.info("Issue certificate for {}".format(subdomains))
                 result = run(" ".join(issue_command), quiet=True)
                 return_code = result.return_code
                 if return_code == 0:

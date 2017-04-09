@@ -33,11 +33,11 @@ def get_cli_parser():
     parser.add_argument('--webfaction-host')
     parser.add_argument('--webfaction-user')
     parser.add_argument('--webfaction-pass')
-    # parser.add_argument('--force',
-    #                     help="Force the renewal of certificate even if it's still valid",
-    #                     default=False,
-    #                     action="store_true",
-    #                     )
+    parser.add_argument('--force',
+                        help="Force the renewal of certificate even if it's still valid",
+                        default=False,
+                        action="store_true",
+                        )
     return parser
 
 
@@ -66,7 +66,7 @@ def main(args=None):
             print("Unknown install %s" % args.name)
     elif args.action == "secure":
         print("Converting websites in the domain %s to HTTPS" % (args.name or '*'))
-        w = WebfactionWebsiteToSsl()
+        w = WebfactionWebsiteToSsl(force=args.force)
         w.secure(domain=args.name)
     elif args.action == "renew":
         domain = args.name
@@ -74,7 +74,7 @@ def main(args=None):
             print("Renew certificates for all the domains")
         else:
             print("Renew certificates for %s" % domain)
-        w = WebfactionWebsiteToSsl()
+        w = WebfactionWebsiteToSsl(force=args.force)
         w.sync_certificates(subdomains=args.name)
 
 
